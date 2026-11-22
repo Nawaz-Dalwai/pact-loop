@@ -1,6 +1,6 @@
 # Pact: the revenue loop, as an interactive prototype
 
-**[▶ Try the live demo](https://nawaz-dalwai.github.io/pact-loop/)** · desktop, about 5 minutes, no sign-up
+**[▶ Try the live demo](https://pact-loop.vercel.app/)** · desktop, about 5 minutes, no sign-up
 
 Pact is a concept for a self-improving revenue system for early-stage B2B founders. It replaces the CRM with one loop
 that runs revenue end to end: it **suggests** the next move, **waits for the founder's yes**, and **learns** from every
@@ -89,8 +89,8 @@ Tiptap (email editor) · Recharts · Sonner · Puppeteer (end-to-end walkthrough
   reload resumes where you left off. Restart from ↺ in the guide strip.
 - **Scripted, not generated.** Pact's replies are fixed content that streams in word by word, with "Gathering
   context…" steps and citations. Some of it adapts to what you chose in setup (segments, skills, uploaded documents).
-- **Static hosting.** Hash routes and relative asset paths mean `dist/` runs from any folder; GitHub Actions lints and
-  builds every push and pull request, and deploys `main` to GitHub Pages.
+- **Static hosting.** Hash routes and relative asset paths mean `dist/` runs on any static host. Vercel deploys `main`
+  (with previews for pull requests); GitHub Actions lints and builds every push.
 
 ```
 src/

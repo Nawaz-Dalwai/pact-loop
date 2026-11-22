@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
 export default defineConfig({
-  // relative asset paths: the build runs from any folder, e.g. GitHub Pages at /pact-loop/
+  // relative asset paths: the build runs from any folder or static host
   base: './',
   plugins: [react(), tailwindcss()],
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },

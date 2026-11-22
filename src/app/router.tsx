@@ -12,7 +12,7 @@ import AutonomyPage from '@/features/autonomy/AutonomyPage'
 import PlanProgressPage from '@/features/plan/PlanProgressPage'
 
 /**
- * Hash routes (#/queue) so the static build works on any host, GitHub Pages included,
+ * Hash routes (#/queue) so the static build works on any host with no rewrite rules,
  * and every screen has a shareable link.
  */
 export const router = createHashRouter([
