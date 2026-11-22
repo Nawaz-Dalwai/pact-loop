@@ -19,7 +19,9 @@ export function TopBar() {
   const step = useDemo((s) => s.step)
   const next = useDemo((s) => s.next)
   const navigate = useNavigate()
-  const notifications = notificationsFor(step)
+  const cap = useDemo((s) => s.autonomyCap)
+  const autonomyOn = useDemo((s) => s.autonomyOn)
+  const notifications = notificationsFor(step, cap, autonomyOn)
   const actionable = notifications.find((n) => n.actionStep === step)
   const queueCount = useQueueCount()
 
@@ -67,8 +69,8 @@ export function TopBar() {
                           variant="outline"
                           className="demo-pulse mt-2"
                           onClick={() => {
-                            next()
-                            navigate(stepInfo(nextStep(step)).route)
+                            if (n.advance) next()
+                            navigate(n.actionTo ?? stepInfo(nextStep(step)).route)
                           }}
                         >
                           {n.actionLabel}

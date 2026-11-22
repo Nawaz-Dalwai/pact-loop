@@ -2,7 +2,7 @@ import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-/** Pills/badges. Colors mirror the capture: stage pills, health dots, status badges. */
+/** Pills/badges: status, health and type labels in soft tinted tones. */
 export const badgeVariants = cva(
   'inline-flex items-center gap-1 whitespace-nowrap rounded-md px-1.5 h-5 text-xs font-medium [&_svg]:size-3',
   {

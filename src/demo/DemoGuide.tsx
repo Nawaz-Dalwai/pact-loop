@@ -69,7 +69,7 @@ export function DemoGuide() {
             navigate(stepInfo(nextStep(step)).route)
           }}
         >
-          Skip time <FastForward />
+          {info.skip} <FastForward />
         </Button>
       )}
 

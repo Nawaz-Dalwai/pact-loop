@@ -23,8 +23,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-/** Merge variables available in templates; rendered per recipient by <EmailPreview />. */
-export const TEMPLATE_VARIABLES = [
+/** Merge variables offered by the editor toolbar. */
+const TEMPLATE_VARIABLES = [
   { token: 'first_name', label: 'First name' },
   { token: 'last_name', label: 'Last name' },
   { token: 'company', label: 'Company' },

@@ -17,3 +17,17 @@ export const PLAN = {
     { label: 'Sep', value: 1000 },
   ],
 }
+
+/** Progress against the plan at each point of the story (fictional). */
+export function progressFor(step: string, reachedUsage: boolean) {
+  const won = step === 'done'
+  return {
+    arr: won ? 346 : 310,
+    leads: reachedUsage ? 41 : 9,
+    pilots: reachedUsage ? 4 : 1,
+    conversions: won ? 1 : 0,
+    /** north star: tasks Pact completed for the founder this week (approved + ran on its own) */
+    tasksApproved: reachedUsage ? 18 : 11,
+    tasksOwn: reachedUsage ? 5 : 0,
+  }
+}

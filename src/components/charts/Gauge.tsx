@@ -1,9 +1,9 @@
-/** "$210.9K" style labels, one decimal (as in the capture's gauge). */
+/** "$210.9K" style labels, one decimal. */
 const compactMoney = (n: number) =>
   n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `$${(n / 1000).toFixed(1)}K` : `$${Math.round(n)}`
 
 /**
- * Semicircle gauge with tick labels and a needle (the "Closed Won Revenue Quarter" tile).
+ * Semicircle gauge with tick labels and a needle (ARR against the goal).
  * Pure SVG so it scales cleanly and needs no chart library.
  */
 export function Gauge({

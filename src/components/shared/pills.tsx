@@ -25,13 +25,17 @@ export function HealthBadge({ health }: { health: Health }) {
 /** Generic status badge for records (Draft / Active / Paused / Ready / Warming / Deal …). */
 export function StatusBadge({ status, className }: { status: string; className?: string }) {
   const tone: Tone =
-    status === 'Active' || status === 'Ready' || status === 'Deal' || status === 'Interested' || status === 'Completed'
+    status === 'Active' || status === 'Ready' || status === 'Deal' || status === 'Interested' || status === 'Completed' || status === 'Customer' || status === 'Sent' || status === 'Approved'
       ? 'green'
-      : status === 'Draft'
+      : status === 'Draft' || status === 'Pilot' || status === 'Meeting booked'
         ? 'blue'
-        : status === 'Paused' || status === 'Warming' || status === 'Suggestion' || status === 'Offered'
-          ? 'amber'
-          : 'neutral'
+        : status === 'Risk' || status === 'At risk'
+          ? 'red'
+          : status === 'Insight' || status === 'New signal' || status === 'Autonomous'
+            ? 'violet'
+            : status === 'Paused' || status === 'Warming' || status === 'Suggestion' || status === 'Offered' || status === 'Digest'
+              ? 'amber'
+              : 'neutral'
   return (
     <Badge tone={tone} className={className}>
       {status}

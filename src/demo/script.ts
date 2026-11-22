@@ -35,8 +35,8 @@ export interface DemoStep {
   hint: string
   /** Where this step happens */
   route: string
-  /** Show "Skip time" (the story waits on the outside world) */
-  skip?: boolean
+  /** Label for the guide's skip button, shown when the story waits on the outside world */
+  skip?: string
 }
 
 export const STEPS: DemoStep[] = [
@@ -48,16 +48,16 @@ export const STEPS: DemoStep[] = [
   { id: 'account', phase: 'turn1', stage: 'Act', route: '/accounts/halcyon', hint: "Read Pact's research, then open the draft it queued" },
   { id: 'queue', phase: 'turn1', stage: 'Surface', route: '/queue', hint: 'Check the evidence, then open the draft' },
   { id: 'decide', phase: 'turn1', stage: 'Decide', route: '/queue', hint: 'Shorten the opener, then approve and send' },
-  { id: 'reply', phase: 'turn1', stage: 'Signal', route: '/home', hint: 'Skip ahead to see what happens next', skip: true },
+  { id: 'reply', phase: 'turn1', stage: 'Signal', route: '/home', hint: 'The note is out. Skip ahead a day for the reply', skip: 'Skip a day' },
   { id: 'brief', phase: 'turn1', stage: 'Act', route: '/home', hint: 'Halcyon booked a call. Open the call brief Pact prepared' },
   { id: 'learned', phase: 'turn1', stage: 'Learn', route: '/home', hint: 'See what Pact learned from your edit' },
-  { id: 'offer', phase: 'turn1', stage: 'Learn', route: '/home', hint: 'Pact asks to send first notes itself. Set a cap and decide' },
-  { id: 'autonomy', phase: 'turn1', stage: 'Decide', route: '/autonomy', hint: 'See what runs on its own, and how to take it back' },
+  { id: 'offer', phase: 'turn1', stage: 'Learn', route: '/home', hint: 'Pact asks to send first notes itself. Set a cap and grant it' },
+  { id: 'autonomy', phase: 'turn1', stage: 'Decide', route: '/autonomy', hint: 'See what runs on its own and how to take it back, then skip ahead', skip: 'Skip two weeks' },
 
-  { id: 'usage', phase: 'turn2', stage: 'Signal', route: '/home', hint: 'Skip ahead two weeks into a pilot', skip: true },
-  { id: 'promises', phase: 'turn2', stage: 'Act', route: '/accounts/quillstack/promises', hint: 'Compare what was promised with what is used' },
-  { id: 'risk', phase: 'turn2', stage: 'Decide', route: '/queue', hint: 'Approve the check-in and bring in a human expert' },
-  { id: 'progress', phase: 'turn2', stage: 'Learn', route: '/plan', hint: 'Skip ahead to the end of the pilot', skip: true },
+  { id: 'usage', phase: 'turn2', stage: 'Signal', route: '/home', hint: 'Two weeks later: open the notification about a pilot' },
+  { id: 'promises', phase: 'turn2', stage: 'Act', route: '/accounts/quillstack/promises', hint: 'Compare what was promised with what is used, then open the risk' },
+  { id: 'risk', phase: 'turn2', stage: 'Decide', route: '/queue', hint: 'Approve the check-in, then bring in a human expert' },
+  { id: 'progress', phase: 'turn2', stage: 'Learn', route: '/plan', hint: 'See progress against the plan, then skip to the end of the pilot', skip: 'Skip to pilot end' },
   { id: 'done', phase: 'done', stage: 'Learn', route: '/plan', hint: 'You ran the whole loop. Replay it any time' },
 ]
 

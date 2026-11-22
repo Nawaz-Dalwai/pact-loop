@@ -16,7 +16,7 @@ function toneFor(name: string) {
   return tones[h % tones.length]
 }
 
-/** Initial-letter avatar, as used throughout the capture (contacts, attendees). */
+/** Initial-letter avatar for people (contacts, attendees). */
 export function Avatar({
   name,
   size = 20,

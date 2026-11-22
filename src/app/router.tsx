@@ -1,21 +1,19 @@
-import { createHashRouter, Navigate } from 'react-router'
+import { createHashRouter } from 'react-router'
 import { AppShell, OnboardingShell } from '@/components/layout/AppShell'
-import { stepInfo } from '@/demo/script'
-import { useDemo } from '@/store'
+import { Resume } from './Resume'
 import Home from '@/pages/Home'
-import Placeholder from '@/pages/Placeholder'
 import ConnectPage from '@/features/onboarding/ConnectPage'
 import LearnPage from '@/features/onboarding/LearnPage'
 import PlanPage from '@/features/onboarding/PlanPage'
-
-/** Land on wherever the demo currently is. */
-function Resume() {
-  const step = useDemo((s) => s.step)
-  return <Navigate to={stepInfo(step).route} replace />
-}
+import QueuePage from '@/features/queue/QueuePage'
+import AccountsPage from '@/features/accounts/AccountsPage'
+import AccountPage from '@/features/accounts/AccountPage'
+import AutonomyPage from '@/features/autonomy/AutonomyPage'
+import PlanProgressPage from '@/features/plan/PlanProgressPage'
 
 /**
- * Hash routes (#/queue) so the static build works on any host and every step has a link.
+ * Hash routes (#/queue) so the static build works on any host, GitHub Pages included,
+ * and every screen has a shareable link.
  */
 export const router = createHashRouter([
   { index: true, element: <Resume /> },
@@ -32,7 +30,13 @@ export const router = createHashRouter([
     element: <AppShell />,
     children: [
       { path: 'home', element: <Home /> },
-      { path: '*', element: <Placeholder /> },
+      { path: 'queue', element: <QueuePage /> },
+      { path: 'accounts', element: <AccountsPage /> },
+      { path: 'accounts/:id', element: <AccountPage /> },
+      { path: 'accounts/:id/:tab', element: <AccountPage /> },
+      { path: 'plan', element: <PlanProgressPage /> },
+      { path: 'autonomy', element: <AutonomyPage /> },
+      { path: '*', element: <Resume /> },
     ],
   },
 ])

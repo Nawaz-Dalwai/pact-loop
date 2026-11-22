@@ -8,8 +8,8 @@ export interface BarDatum {
 const compact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n))
 
 /**
- * Monthly bar chart with a dashed target line (the "Meetings Scheduled" report).
- * Bars are clickable so a page can drill into the deals underneath a segment.
+ * Bar chart with a dashed target line (plan paths, weekly usage against a goal).
+ * Bars can be clickable so a page can drill into what sits behind them.
  */
 export function TargetBarChart({
   data,

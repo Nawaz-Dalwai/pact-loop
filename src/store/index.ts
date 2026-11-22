@@ -27,7 +27,25 @@ interface DemoState {
   segments: string[]
   skills: Record<string, SkillLevel>
   planShown: boolean
+  /* Turn 1 */
+  halcyonSent: boolean
+  /** words in the opener Priya sent (Pact's draft had 41) */
+  openerWords: number
+  learnedUndone: boolean
+  offerDeferred: boolean
+  autonomyCap: string | null
+  /** first notes run on their own (false after "Take back") */
+  autonomyOn: boolean
+  pauseOnEdits: boolean
+  notifyEachRun: boolean
+  /** digest items dismissed, with the reason given */
+  dismissed: Record<string, string>
+  /* Turn 2 */
+  checkinSent: boolean
+  expertRequested: boolean
 
+  /** set any demo fields at once */
+  patch: (p: Partial<DemoData>) => void
   /** move the demo to a step (only ever forward in normal use) */
   goTo: (step: StepId) => void
   next: () => void
@@ -59,12 +77,25 @@ const initial = {
   segments: [] as string[],
   skills: {} as Record<string, SkillLevel>,
   planShown: false,
+  halcyonSent: false,
+  openerWords: 41,
+  learnedUndone: false,
+  offerDeferred: false,
+  autonomyCap: null as string | null,
+  autonomyOn: false,
+  pauseOnEdits: true,
+  notifyEachRun: true,
+  dismissed: {} as Record<string, string>,
+  checkinSent: false,
+  expertRequested: false,
 }
+type DemoData = typeof initial
 
 export const useDemo = create<DemoState>()(
   persist(
     (set, get) => ({
       ...initial,
+      patch: (p) => set(p),
       goTo: (step) => set({ step }),
       next: () => {
         const i = stepIndex(get().step)
@@ -99,8 +130,8 @@ export const useDemo = create<DemoState>()(
     }),
     {
       name: 'pact-loop-demo',
-      version: 2,
-      // v1 had no document fields; keep its progress and let the defaults fill the rest
+      version: 3,
+      // older saves lack newer fields; keep their progress and let the defaults fill the rest
       migrate: (persisted) => persisted as DemoState,
     },
   ),

@@ -3,7 +3,7 @@ import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import { Check, Minus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-/** 18px square checkbox, 4px radius, dark when checked (as in the capture's tables). */
+/** 16px square checkbox, 4px radius, dark when checked. */
 export function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
   return (
     <CheckboxPrimitive.Root

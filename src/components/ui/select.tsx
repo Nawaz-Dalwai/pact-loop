@@ -9,7 +9,7 @@ export interface SelectOption {
   icon?: React.ReactNode
 }
 
-/** Single-value select (combobox look from the capture: white, 32px, chevron right). */
+/** Single-value select: white, 32px, chevron right. */
 export function Select({
   value,
   onValueChange,
