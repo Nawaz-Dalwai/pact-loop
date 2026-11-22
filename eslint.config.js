@@ -21,7 +21,8 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',
-        { allowConstantExport: true },
+        // cva variant helpers live next to their component, as in shadcn/ui
+        { allowConstantExport: true, allowExportNames: ['buttonVariants', 'badgeVariants'] },
       ],
     },
   },
