@@ -1,0 +1,154 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Pact design tokens.
+ * Neutrals follow the shadcn "neutral" oklch scale observed in the capture
+ * (foreground 0.205, muted-foreground 0.556, border 0.922). Desktop light theme only.
+ */
+:root {
+  --radius: 0.5rem;
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.205 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.205 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.205 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.205 0 0);
+  --sidebar-accent: oklch(0.922 0 0 / 0.6);
+  --sidebar-border: oklch(0.922 0 0);
+
+  --table-background-hover: oklch(0.985 0 0);
+  --toggle-selected: oklch(0.97 0 0);
+
+  /* Pact accent: used for AI surfaces, greeting gradient, focus details */
+  --brand: oklch(0.55 0.2 277);
+  --brand-soft: oklch(0.96 0.03 277);
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", "Inter", "SF Pro Display", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-table-background-hover: var(--table-background-hover);
+  --color-toggle-selected: var(--toggle-selected);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+/* Email/editor body typography (Tiptap content + rendered previews) */
+@layer components {
+  .pact-prose {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .pact-prose p {
+    margin: 0 0 0.75em;
+  }
+  .pact-prose ul,
+  .pact-prose ol {
+    margin: 0 0 0.75em;
+    padding-left: 1.4em;
+  }
+  .pact-prose ul {
+    list-style: disc;
+  }
+  .pact-prose ol {
+    list-style: decimal;
+  }
+  .pact-prose a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .pact-prose strong {
+    font-weight: 600;
+  }
+  .pact-prose p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    color: var(--muted-foreground);
+  }
+}
+
+/* Demo guide: violet pulse on the one thing to click next (brand hue 277) */
+@keyframes demo-pulse {
+  0% {
+    box-shadow: 0 0 0 0 oklch(0.55 0.2 277 / 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 8px oklch(0.55 0.2 277 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.55 0.2 277 / 0);
+  }
+}
+@layer utilities {
+  .demo-pulse {
+    animation: demo-pulse 1.8s ease-out infinite;
+  }
+}
