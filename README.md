@@ -2,7 +2,7 @@
 
 **[▶ Try the live demo](https://pact-loop.vercel.app/)** · desktop, about 5 minutes, no sign-up
 
-**Background:** [Engineering approach (PDF)](docs/Pact-Engineering-Approach.pdf): MVP scope, architecture, AI quality, cost, trust and safety, team and rollout plan.
+**Background:** [Pitch deck (PDF)](docs/Pact-Pitch-Deck.pdf): the problem, who it's for, the product, differentiation and business model · [Engineering approach (PDF)](docs/Pact-Engineering-Approach.pdf): MVP scope, architecture, AI quality, cost, trust and safety, team and rollout plan.
 
 Pact is a concept for a self-improving revenue system for early-stage B2B founders. It replaces the CRM with one loop
 that runs revenue end to end: it **suggests** the next move, **waits for the founder's yes**, and **learns** from every
