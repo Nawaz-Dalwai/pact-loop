@@ -89,8 +89,8 @@ Tiptap (email editor) · Recharts · Sonner · Puppeteer (end-to-end walkthrough
   reload resumes where you left off. Restart from ↺ in the guide strip.
 - **Scripted, not generated.** Pact's replies are fixed content that streams in word by word, with "Gathering
   context…" steps and citations. Some of it adapts to what you chose in setup (segments, skills, uploaded documents).
-- **Static hosting.** Hash routes and relative asset paths mean `dist/` runs from any folder; GitHub Actions lints,
-  builds and deploys it to GitHub Pages on every push.
+- **Static hosting.** Hash routes and relative asset paths mean `dist/` runs from any folder; GitHub Actions lints and
+  builds every push and pull request, and deploys `main` to GitHub Pages.
 
 ```
 src/
