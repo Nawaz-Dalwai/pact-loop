@@ -1,6 +1,7 @@
 /**
- * The fixed demo script. Every step of the board's workflow, in order.
- * The guide strip, route guards and pulse highlights all read from here.
+ * The fixed demo script, in order. Each step is one decision the founder makes; everything
+ * Pact does in between plays out on its own. The guide strip, route guards and pulse
+ * highlights all read from here.
  */
 export type Phase = 'setup' | 'turn1' | 'turn2' | 'done'
 
@@ -12,16 +13,10 @@ export type StepId =
   | 'learn'
   | 'plan'
   | 'signal'
-  | 'account'
-  | 'queue'
   | 'decide'
-  | 'reply'
-  | 'brief'
-  | 'learned'
   | 'offer'
   | 'autonomy'
   | 'usage'
-  | 'promises'
   | 'risk'
   | 'progress'
   | 'done'
@@ -35,30 +30,30 @@ export interface DemoStep {
   hint: string
   /** Where this step happens */
   route: string
+  /** The screen's name, for "this step is on …" */
+  where: string
+  /** Other screens where the step can be done; a trailing /* matches anything below */
+  paths?: string[]
+  /** The step's action lives in the guide itself (Skip), so any screen is fine */
+  anywhere?: boolean
   /** Label for the guide's skip button, shown when the story waits on the outside world */
   skip?: string
 }
 
 export const STEPS: DemoStep[] = [
-  { id: 'connect', phase: 'setup', stage: 'Connect', route: '/onboarding/connect', hint: 'Connect all five sources, then let Pact build your pipeline' },
-  { id: 'learn', phase: 'setup', stage: 'Learn the business', route: '/onboarding/learn', hint: 'Upload what you already have, or skip, then confirm what Pact learned' },
-  { id: 'plan', phase: 'setup', stage: 'Plan', route: '/onboarding/plan', hint: 'Review the plan Pact worked back from your goal, then agree it' },
+  { id: 'connect', phase: 'setup', stage: 'Connect', route: '/onboarding/connect', where: 'Connect', hint: 'Connect your tools (skip any you don’t use), then hand Pact your documents' },
+  { id: 'learn', phase: 'setup', stage: 'Learn the business', route: '/onboarding/learn', where: 'Learn the business', hint: 'Add what only you know to the profile Pact found, then confirm it' },
+  { id: 'plan', phase: 'setup', stage: 'Plan', route: '/onboarding/plan', where: 'Plan', hint: 'Pick your goal, then agree the plan Pact works back from it' },
 
-  { id: 'signal', phase: 'turn1', stage: 'Signal', route: '/home', hint: 'Open Notifications: a past contact just raised a round' },
-  { id: 'account', phase: 'turn1', stage: 'Act', route: '/accounts/halcyon', hint: "Read Pact's research, then open the draft it queued" },
-  { id: 'queue', phase: 'turn1', stage: 'Surface', route: '/queue', hint: 'Check the evidence, then open the draft' },
-  { id: 'decide', phase: 'turn1', stage: 'Decide', route: '/queue', hint: 'Shorten the opener, then approve and send' },
-  { id: 'reply', phase: 'turn1', stage: 'Signal', route: '/home', hint: 'The note is out. Skip ahead a day for the reply', skip: 'Skip a day' },
-  { id: 'brief', phase: 'turn1', stage: 'Act', route: '/home', hint: 'Halcyon booked a call. Open the call brief Pact prepared' },
-  { id: 'learned', phase: 'turn1', stage: 'Learn', route: '/home', hint: 'See what Pact learned from your edit' },
-  { id: 'offer', phase: 'turn1', stage: 'Learn', route: '/home', hint: 'Pact asks to send first notes itself. Set a cap and grant it' },
-  { id: 'autonomy', phase: 'turn1', stage: 'Decide', route: '/autonomy', hint: 'See what runs on its own and how to take it back, then skip ahead', skip: 'Skip two weeks' },
+  { id: 'signal', phase: 'turn1', stage: 'Signal', route: '/home', where: 'Home', hint: "A past champion's company just raised. Open what Pact prepared" },
+  { id: 'decide', phase: 'turn1', stage: 'Decide', route: '/queue', where: 'Queue', hint: 'Shorten the opener, then approve and send' },
+  { id: 'offer', phase: 'turn1', stage: 'Learn', route: '/home', where: 'Home', hint: 'A day later: see what Pact learned, then let it send first notes itself' },
+  { id: 'autonomy', phase: 'turn1', stage: 'Learn', route: '/autonomy', where: 'Autonomy', anywhere: true, hint: 'First notes now run on their own, within your cap. Skip ahead two weeks', skip: 'Skip two weeks' },
 
-  { id: 'usage', phase: 'turn2', stage: 'Signal', route: '/home', hint: 'Two weeks later: open the notification about a pilot' },
-  { id: 'promises', phase: 'turn2', stage: 'Act', route: '/accounts/quillstack/promises', hint: 'Compare what was promised with what is used, then open the risk' },
-  { id: 'risk', phase: 'turn2', stage: 'Decide', route: '/queue', hint: 'Approve the check-in, then bring in a human expert' },
-  { id: 'progress', phase: 'turn2', stage: 'Learn', route: '/plan', hint: 'See progress against the plan, then skip to the end of the pilot', skip: 'Skip to pilot end' },
-  { id: 'done', phase: 'done', stage: 'Learn', route: '/plan', hint: 'You ran the whole loop. Replay it any time' },
+  { id: 'usage', phase: 'turn2', stage: 'Signal', route: '/home', where: 'Home', hint: "Two weeks later, a pilot's health dropped. Open what Pact found" },
+  { id: 'risk', phase: 'turn2', stage: 'Decide', route: '/queue', where: 'Queue', hint: 'Approve the check-in, then bring in an expert' },
+  { id: 'progress', phase: 'turn2', stage: 'Learn', route: '/plan', where: 'Plan', anywhere: true, hint: 'See progress against your plan, then skip to the end of the pilot', skip: 'Skip to pilot end' },
+  { id: 'done', phase: 'done', stage: 'Learn', route: '/plan', where: 'Plan', hint: 'Approve the expansion Pact drafted. Replay the loop any time' },
 ]
 
 export const stepIndex = (id: StepId) => STEPS.findIndex((s) => s.id === id)
@@ -70,3 +65,14 @@ export const isSetup = (id: StepId) => stepInfo(id).phase === 'setup'
 export const reached = (current: StepId, target: StepId) => stepIndex(current) >= stepIndex(target)
 /** The step after this one. */
 export const nextStep = (id: StepId): StepId => STEPS[Math.min(STEPS.length - 1, stepIndex(id) + 1)]!.id
+
+/** True when the visitor is on a screen where the step can be done. */
+export function onPath(id: StepId, pathname: string) {
+  const info = stepInfo(id)
+  if (info.anywhere) return true
+  return [info.route, ...(info.paths ?? [])].some((p) =>
+    p.endsWith('/*') ? pathname === p.slice(0, -2) || pathname.startsWith(p.slice(0, -1)) : pathname === p,
+  )
+}
+/** The steps of one phase, in order. */
+export const stepsOf = (phase: Phase) => STEPS.filter((s) => s.phase === phase)

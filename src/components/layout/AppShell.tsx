@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Navigate, Outlet, useLocation, useNavigation } from 'react-router'
 import { Monitor } from 'lucide-react'
 import { Sidebar } from './Sidebar'
@@ -8,21 +8,11 @@ import { PactMark, PactWordmark } from './Logo'
 import { allNavItems } from './nav'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from '@/components/ui/toaster'
-import { DemoGuide } from '@/demo/DemoGuide'
+import { DemoGuide, StepCoach } from '@/demo/DemoGuide'
 import { isSetup, stepInfo } from '@/demo/script'
 import { useCurrentUser, useDemo } from '@/store'
+import { MIN_WIDTH, useWindowWidth } from '@/lib/useWindowWidth'
 
-export const MIN_WIDTH = 1280
-
-function useWindowWidth() {
-  const [w, setW] = useState(() => window.innerWidth)
-  useEffect(() => {
-    const on = () => setW(window.innerWidth)
-    window.addEventListener('resize', on)
-    return () => window.removeEventListener('resize', on)
-  }, [])
-  return w
-}
 
 /** Desktop-only prototype: below MIN_WIDTH show a blocker instead of a squashed layout. */
 function TooSmall() {
@@ -82,6 +72,7 @@ export function AppShell() {
         <AskPanel />
       </div>
       <CommandPalette />
+      <StepCoach />
       <Toaster />
     </TooltipProvider>
   )
@@ -113,6 +104,7 @@ export function OnboardingShell() {
           <Outlet />
         </div>
       </div>
+      <StepCoach />
       <Toaster />
     </TooltipProvider>
   )

@@ -52,7 +52,8 @@ export default function AutonomyPage() {
           <KpiTiles
             items={[
               { label: 'Monthly cap', value: cap ?? 'Not set' },
-              { label: 'Spent this month', value: runs.length ? `$4 of ${cap}` : '$0' },
+              { label: 'Spent this month', value: cap ? `$0 of ${cap}` : '$0' },
+              { label: 'Included tasks used', value: `${runs.length} of 100`, hint: 'Your plan includes 100 autonomous tasks a month; beyond that, from $0.25 a task, up to your cap' },
               { label: 'Tasks running on their own', value: autonomyOn ? 1 : 0 },
               { label: 'Taken back', value: takenBack ? 1 : 0 },
             ]}
@@ -104,7 +105,7 @@ export default function AutonomyPage() {
                     <Badge tone="neutral">No approval needed</Badge>
                   </td>
                   <td className="px-3 text-muted-foreground">Internal only: nothing is sent to anyone</td>
-                  <td className="px-3 text-right tabular-nums">{reached(step, 'brief') ? 3 : 0}</td>
+                  <td className="px-3 text-right tabular-nums">{reached(step, 'offer') ? 3 : 0}</td>
                   <td />
                 </tr>
                 <tr>

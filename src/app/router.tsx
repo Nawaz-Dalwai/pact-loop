@@ -2,6 +2,7 @@ import { createHashRouter } from 'react-router'
 import { AppShell, OnboardingShell } from '@/components/layout/AppShell'
 import { Resume } from './Resume'
 import Home from '@/pages/Home'
+import Landing from '@/pages/Landing'
 import ConnectPage from '@/features/onboarding/ConnectPage'
 import LearnPage from '@/features/onboarding/LearnPage'
 import PlanPage from '@/features/onboarding/PlanPage'
@@ -16,7 +17,7 @@ import PlanProgressPage from '@/features/plan/PlanProgressPage'
  * and every screen has a shareable link.
  */
 export const router = createHashRouter([
-  { index: true, element: <Resume /> },
+  { index: true, element: <Landing /> },
   {
     path: 'onboarding',
     element: <OnboardingShell />,

@@ -18,7 +18,7 @@ This prototype lets anyone walk that loop twice, end to end, with no one there t
 
 | Stage | What Pact does | Where you see it |
 |---|---|---|
-| **Signal** | Watches email, calls, meetings, Slack, product usage, and outside news like funding and hiring | A past contact raises a round; a pilot falls behind on a promise |
+| **Signal** | Watches email, calls, meetings, Slack, product usage, and outside news like funding and hiring | A past champion's company raises a round; a pilot falls behind on a promise |
 | **Act** | Researches accounts, drafts notes, preps call briefs, tracks promises against usage | Account record, call brief, promise tracker |
 | **Surface** | Speaks up unprompted, always with the evidence | The queue |
 | **Decide** | The founder approves, edits or dismisses. Nothing runs without a yes | Draft review, autonomy offer, human expert |
@@ -26,21 +26,23 @@ This prototype lets anyone walk that loop twice, end to end, with no one there t
 
 ## What the demo walks through
 
-A guide strip on every screen shows where you are in the loop and the one thing to do next (it pulses).
-The flow is deliberately fixed: every input is required, so every visitor sees the whole story.
+**16 clicks, about 2–3 minutes.** Every click is a decision the founder makes; everything Pact does in between plays
+out on its own. A guide bar on every screen shows the exact step and the one thing to do next, with **Show me** and
+**Take me there** if you get lost. Depth (the call brief, promises, the Autonomy page) stays one click away but optional.
 
-**Setup.** Connect five sources, then let Pact build a pipeline from past email. Teach it the business by
-**uploading what you already have** (pitch deck, ICP doc, sales playbook…) or by answering three questions. Agree a plan
-Pact works back from the goal: $1M ARR.
+**Setup.** Connect email (required), then connect or skip calendar, calls, Slack, billing and product analytics; the rest of the
+journey adapts to what's connected (without product analytics, for example, Pact learns of a missed promise from Slack, or
+notices the silence and asks). Pact builds a pipeline from past email. Hand it **sample documents** (pitch deck, ICP doc, playbook…) and it proposes
+your profile, contradicting the ICP with your own deal data; you add "on-call team of 5+" and confirm. Pick a goal (new ARR by
+Sep 30, 2027) and agree the plan Pact works back from it: at $1M, 29 new customers from 64 pilots, about 1.5 a week.
 
-**Turn 1 · Find and Win.** A past contact raises a seed round → Pact researches the account and drafts a first note →
-the note reaches the queue with its evidence → you must **cut Pact's long opener before you can approve** → the reply
-books a call and Pact preps the brief → Pact learns you write short openers → it **asks to send first notes on its own**,
-and you have to set a monthly cap to say yes.
+**Turn 1 · Find and Win.** A past champion's new company raises a seed round → open the draft Pact prepared, with its
+research and evidence beside it → **cut Pact's long opener** and approve → a day later the reply books a call, Pact has the
+brief ready and has learned two things → it **asks to send first notes on its own**, within a monthly cap.
 
-**Turn 2 · Deliver and Grow.** Two weeks later, a pilot is behind on a promise made on the kickoff call → Pact compares
-promise and product usage, flags renewal risk and drafts a check-in that owns the miss → you approve it and **bring in a
-human expert** → the pilot converts, and the plan and "What Pact learned" update.
+**Turn 2 · Deliver and Grow.** Two weeks later, a pilot's health drops from 78 to 41 → open the check-in Pact drafted,
+with the promise, the usage and the cause beside it → approve it and **bring in a human expert** → the pilot converts, and you
+approve the **expansion quote** Pact drafted from seat usage.
 
 | | |
 |---|---|

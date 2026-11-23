@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router'
 import { Bell, Inbox, MessageSquare, Search } from 'lucide-react'
-import { useDemo, useUi } from '@/store'
+import { useDemo, useGoal, useUi } from '@/store'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { notificationsFor } from '@/demo/content'
@@ -21,7 +21,9 @@ export function TopBar() {
   const navigate = useNavigate()
   const cap = useDemo((s) => s.autonomyCap)
   const autonomyOn = useDemo((s) => s.autonomyOn)
-  const notifications = notificationsFor(step, cap, autonomyOn)
+  const connected = useDemo((s) => s.connected)
+  const goal = useGoal()
+  const notifications = notificationsFor(step, cap, autonomyOn, connected, goal)
   const actionable = notifications.find((n) => n.actionStep === step)
   const queueCount = useQueueCount()
 
@@ -41,8 +43,8 @@ export function TopBar() {
           <PopoverTrigger asChild>
             <button
               className={cn(
+                // the signal card on Home is the one call to action; the bell just carries a dot
                 'flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium hover:bg-accent',
-                actionable && 'demo-pulse',
               )}
             >
               <span className="relative">
@@ -70,7 +72,7 @@ export function TopBar() {
                           className="demo-pulse mt-2"
                           onClick={() => {
                             if (n.advance) next()
-                            navigate(n.actionTo ?? stepInfo(nextStep(step)).route)
+                            navigate(n.actionTo ?? stepInfo(nextStep(step)).route, { state: n.actionState })
                           }}
                         >
                           {n.actionLabel}

@@ -1,10 +1,12 @@
 /**
- * End-to-end walkthrough: runs the whole scripted demo in headless Chrome and fails on any
- * page or console error. Optionally saves a screenshot at each key screen.
+ * End-to-end walkthrough: runs the whole scripted demo in headless Chrome, counts the visitor's
+ * clicks, and fails on any page or console error. Optionally saves a screenshot at each key screen.
  *
  *   npm run dev                       # or: npm run build && npm run preview
- *   npm run e2e                       # upload-documents path
- *   SKIP_DOCS=1 npm run e2e           # skip documents, answer the questions instead
+ *   npm run e2e                       # sample-documents path, every tool connected
+ *   SKIP_DOCS=1 npm run e2e           # skip documents; Pact proposes the profile from your deals
+ *   TOOLS=email npm run e2e           # connect only email, skip the other five (any comma list works)
+ *   NAME="Dana Kim" COMPANY=Northwind npm run e2e   # play the founder yourself (default: Priya at Tracelane)
  *
  * Env: BASE (app URL), CHROME_PATH (Chrome or Chromium binary), SHOTS (folder for screenshots), DPR.
  */
@@ -13,7 +15,12 @@ import puppeteer from 'puppeteer-core'
 
 const BASE = process.env.BASE ?? 'http://localhost:5173/'
 const SKIP_DOCS = Boolean(process.env.SKIP_DOCS)
+const TOOLS = (process.env.TOOLS ?? 'email,calendar,calls,slack,billing,product').split(',')
 const SHOTS = process.env.SHOTS
+const NAME = process.env.NAME ?? ''
+const COMPANY = process.env.COMPANY ?? ''
+const FIRST = (NAME.trim() || 'Priya Raman').split(/\s+/)[0]
+const COMPANY_SHOWN = COMPANY.trim() || 'Tracelane'
 const CHROME_PATH =
   process.env.CHROME_PATH ??
   (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : '/usr/bin/google-chrome')
@@ -28,6 +35,9 @@ page.on('console', (m) => m.type() === 'error' && errors.push('console: ' + m.te
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms))
 const waitText = (t, timeout = 30000) => page.waitForFunction((t) => document.body.innerText.includes(t), { timeout }, t)
+/** every click the visitor makes, by workflow */
+const clicks = { setup: 0, turn1: 0, turn2: 0 }
+let phase = 'setup'
 async function click(t, timeout = 30000) {
   await page.waitForFunction(
     (t) => [...document.querySelectorAll('button,a,[role=option]')].some((b) => b.innerText.trim().includes(t) && !b.disabled),
@@ -39,6 +49,7 @@ async function click(t, timeout = 30000) {
     el.scrollIntoView({ block: 'center' })
     el.click()
   }, t)
+  clicks[phase] += 1
 }
 const shot = async (n) => {
   if (!SHOTS) return
@@ -48,132 +59,110 @@ const shot = async (n) => {
   await style.evaluate((el) => el.remove())
 }
 const log = (s) => console.log(new Date().toISOString().slice(11, 19), s)
+log(`tools: ${TOOLS.join(', ')}`)
+const started = Date.now()
 
 await page.goto(BASE, { waitUntil: 'networkidle0' })
 await page.evaluate(() => localStorage.clear())
 await page.goto(BASE, { waitUntil: 'networkidle0' })
 
-// ---------- setup ----------
-await waitText('Welcome, Priya')
-for (let i = 0; i < 5; i++) {
-  await click('Connect')
-  await wait(1050)
+// ---------- landing ----------
+await waitText('Start the interactive demo')
+if (NAME) await page.type('#founder-name', NAME)
+if (COMPANY) await page.type('#founder-company', COMPANY)
+await shot('00-landing')
+// the start button isn't one of the founder's decisions, so it isn't counted
+await page.evaluate(() => [...document.querySelectorAll('button')].find((b) => b.innerText.includes('Start the interactive demo')).click())
+
+// ---------- workflow 1 · onboard ----------
+await waitText(`Welcome, ${FIRST}`)
+// skip the tools not in TOOLS (optional clicks), then connect the rest in one go
+for (const [id, name] of [['calendar', 'Calendar'], ['calls', 'Calls'], ['slack', 'Slack'], ['billing', 'Billing'], ['product', 'Product analytics']]) {
+  if (TOOLS.includes(id)) continue
+  await page.evaluate((name) => {
+    const li = [...document.querySelectorAll('li')].find((l) => l.querySelector('p')?.innerText.startsWith(name))
+    ;[...li.querySelectorAll('button')].find((b) => b.innerText.trim() === 'Skip').click()
+  }, name)
+  clicks.setup += 1
 }
-await waitText('Accounts found')
+await click('Connect')
+await waitText('Accounts found', 40000)
 await shot('01-connect')
-await click('Continue')
 log('connect ok')
 
 if (SKIP_DOCS) {
-  await click("Skip, I'll answer questions")
-  await click("Yes, that's right")
-  await click('Dev tools')
-  await click('Fintech')
-  await click('Confirm segments')
-  await waitText('Last one')
-  await wait(1500)
-  await page.evaluate(() => {
-    const rows = [...document.querySelectorAll('li')].filter((li) => li.innerText.includes("I'm strong"))
-    rows.forEach((li, i) => [...li.querySelectorAll('button')][i % 2].click())
-  })
-  await click('Confirm')
+  await click("Skip, I'll answer")
 } else {
-  await click('Choose files')
-  await click('Select all')
-  await shot('02-upload-picker')
-  await click('Upload 6 files')
-  await waitText('Is that still right?', 40000)
-  await wait(1200)
-  await page.evaluate(() => document.querySelector('.overflow-y-auto')?.scrollTo(0, 0))
-  await shot('03-docs-read')
-  await click("Yes, that's right")
-  await waitText("I've selected those two")
-  await click('Confirm segments')
-  await waitText('Adjust anything, then confirm')
-  await click('Confirm')
+  await click('Use sample documents')
+  await waitText("Here's the profile they point to", 40000)
+  await shot('02-docs-read')
 }
-await click('Continue to your plan')
+await waitText("Add anything the data can't see", 40000)
+await click('On-call team of 5+')
+await shot('03-profile')
+await click('Confirm profile')
 log('learn ok')
+
+await click('$1M new ARR')
+await waitText('29 new customers', 40000)
 await click('Agree plan', 40000)
-await waitText('Hi Priya')
+await waitText(`Hi ${FIRST}`)
 log('plan ok')
 
-// ---------- Turn 1 ----------
-await click('Notifications')
-await click('Open account')
-await waitText('Pact drafted a first note')
-await shot('04-account-research')
-await click('Pact drafted a first note')
-await waitText('First note to Maya Okafor')
-await shot('05-queue-evidence')
-await click('Open draft')
+// ---------- workflow 2 · find and win ----------
+phase = 'turn1'
+await shot('04-signal')
+await click('Open what Pact prepared')
 await waitText('Type my edit', 40000)
-await shot('06-draft-long-opener')
+// the note is signed by the founder, and cites their company
+await page.waitForFunction((f) => document.body.innerText.includes(`\n${f}\n`), { timeout: 20000 }, FIRST)
+await waitText(`41% with ${COMPANY_SHOWN}`)
+await shot('05-draft')
 await click('Type my edit')
 await waitText('Ready to approve', 10000)
-await shot('07-draft-approve')
 await click('Approve & send')
-await waitText('Hi Priya')
-log('decide ok')
-await click('Skip a day')
-await waitText('On deck')
-await click('View call brief')
-await waitText('Discovery questions')
-await shot('08-call-brief')
-await click('Done reviewing')
-await waitText('Pact learned: you prefer short openers')
-await shot('09-learned')
-await click('Got it')
-await waitText('Let Pact send first notes on its own?')
-await click('Choose a cap')
-await click('$50 a month')
-await shot('10-autonomy-offer')
+await waitText('A day later', 20000)
+await shot('06-a-day-later')
 await click('Grant autonomy')
 await waitText('Run log')
-await shot('11-autonomy-page')
+await shot('07-autonomy')
+await click('Skip two weeks')
 log('turn 1 ok')
 
-// ---------- Turn 2 ----------
-await click('Skip two weeks')
-await waitText('Hi Priya')
-await click('Notifications')
-await click('Open account')
-await waitText('Pact flagged a renewal risk')
-await shot('12-promises')
-await click('Pact flagged a renewal risk')
-await waitText('Renewal risk: Quillstack pilot')
-await shot('13-queue-risk')
-await click('Open check-in')
+// ---------- workflow 3 · deliver and grow ----------
+phase = 'turn2'
+await waitText('Open what Pact found')
+await shot('08-risk-signal')
+await click('Open what Pact found')
 await page.waitForFunction(() => [...document.querySelectorAll('button')].some((b) => b.innerText.includes('Approve & send') && !b.disabled), { timeout: 40000 })
+await shot('09-checkin')
 await click('Approve & send')
 await click('Bring in an expert')
-await click('Renewal terms and pricing')
-await shot('14-expert')
-await click('Request expert')
-await waitText('Plan to $1M ARR')
-log('turn 2 ok')
+await waitText('Plan to $1M in new ARR')
 await click('Skip to pilot end')
 await waitText('You ran the whole loop')
-await wait(900)
-await shot('15-finish')
-await page.evaluate(() => document.querySelector('main .overflow-y-auto')?.scrollTo(0, 700))
-await shot('16-plan-learned')
-log('done')
+await shot('10-finish')
+await click('Approve & send')
+await waitText('Expansion quote sent')
+log('turn 2 ok')
 
-// extra browsing checks
+const total = clicks.setup + clicks.turn1 + clicks.turn2
+log(`clicks: ${total} (onboard ${clicks.setup}, find and win ${clicks.turn1}, deliver and grow ${clicks.turn2}) in ${Math.round((Date.now() - started) / 1000)}s`)
+
+// ---------- getting lost, and optional depth ----------
 await page.goto(BASE + '#/accounts', { waitUntil: 'networkidle0' })
 await waitText('Showing 8 of 48')
-await shot('17-accounts')
-await page.goto(BASE + '#/accounts/halcyon/timeline', { waitUntil: 'networkidle0' })
-await click('Read full text')
-await shot('18-timeline')
+await page.goto(BASE + '#/accounts/halcyon/brief', { waitUntil: 'networkidle0' })
+await waitText('Discovery questions')
+await page.goto(BASE + '#/accounts/quillstack/promises', { waitUntil: 'networkidle0' })
+await waitText('Weekly check-in with Ana')
 await page.goto(BASE + '#/queue', { waitUntil: 'networkidle0' })
 await click('Reviewed')
-await shot('19-reviewed')
+await shot('11-reviewed')
 
 await browser.close()
 if (errors.length) {
   console.error(errors.join('\n'))
   process.exit(1)
 }
-console.log(`Walkthrough passed (${SKIP_DOCS ? 'answered questions' : 'uploaded documents'}), no errors.`)
+console.log(`Walkthrough passed (${FIRST} at ${COMPANY_SHOWN}; ${SKIP_DOCS ? 'no documents' : 'sample documents'}; tools: ${TOOLS.join(', ')}), no errors.`)

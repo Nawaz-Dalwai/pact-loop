@@ -12,7 +12,7 @@ export function useQueueCount() {
   const step = useDemo((s) => s.step)
   const dismissed = useDemo((s) => s.dismissed)
   let n = DIGEST.filter((d) => !dismissed[d.id]).length
-  if (reached(step, 'account') && !reached(step, 'reply')) n += 1 // Halcyon first note
-  if (reached(step, 'promises') && !reached(step, 'progress')) n += 1 // Quillstack renewal risk
+  if (reached(step, 'signal') && !reached(step, 'offer')) n += 1 // Halcyon first note
+  if (reached(step, 'usage') && !reached(step, 'progress')) n += 1 // Quillstack renewal risk
   return n
 }

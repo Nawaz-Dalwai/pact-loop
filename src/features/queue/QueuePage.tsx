@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Check, ChevronDown, Clock, Inbox, Mail, ShieldCheck, TriangleAlert, UserRoundPlus, type LucideIcon } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -12,14 +12,16 @@ import { StatusBadge } from '@/components/shared/pills'
 import { Inline } from '@/components/chat/inline'
 import { TargetBarChart } from '@/components/charts/TargetBarChart'
 import { quillstackAlerts } from '@/data/accounts'
+import { pilotView } from '@/demo/sources'
+import { ConnectNudge } from '@/demo/ConnectNudge'
 import { DIGEST } from '@/demo/useQueue'
 import { reached } from '@/demo/script'
-import { useDemo } from '@/store'
+import { useCurrentUser, useDemo } from '@/store'
 import { cn } from '@/lib/utils'
 import { DraftSheet } from './DraftSheet'
 import { openerWordsOf } from './opener'
 import { ExpertDialog } from './ExpertDialog'
-import { checkinDraft, halcyonDraft } from './drafts'
+import { checkinDraft, expansionDraft, halcyonDraft } from './drafts'
 
 const DISMISS_REASONS = ['Not now', 'Wrong person', 'Already handled', "I'll do it myself"]
 
@@ -95,16 +97,31 @@ export default function QueuePage() {
   const autonomyOn = useDemo((s) => s.autonomyOn)
   const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('needs')
-  const [sheet, setSheet] = useState<'halcyon' | 'checkin' | null>(null)
+  const [sheet, setSheet] = useState<'halcyon' | 'checkin' | 'expansion' | null>(null)
   const [expertOpen, setExpertOpen] = useState(false)
+  const location = useLocation()
+  const user = useCurrentUser()
+
+  // arriving from a signal: open the draft it points to, once
+  useEffect(() => {
+    const open = (location.state as { open?: 'halcyon' | 'checkin' } | null)?.open
+    if (!open) return
+    setSheet(open)
+    navigate(location.pathname, { replace: true, state: null })
+  }, [location.state, location.pathname, navigate])
 
   const halcyon = useMemo(() => halcyonDraft(skills, uploads), [skills, uploads])
-  const checkin = useMemo(() => checkinDraft(), [])
+  const connected = useDemo((s) => s.connected)
+  const pilot = pilotView(connected)
+  const checkin = useMemo(() => checkinDraft(connected), [connected])
+  const expansion = useMemo(() => expansionDraft(connected), [connected])
+  const expansionSent = useDemo((s) => s.expansionSent)
 
   const digest = DIGEST.filter((d) => !dismissed[d.id])
-  const showHalcyon = reached(step, 'account') && !reached(step, 'reply')
-  const showRisk = reached(step, 'promises') && !reached(step, 'progress')
-  const needsCount = digest.length + (showHalcyon ? 1 : 0) + (showRisk ? 1 : 0)
+  const showHalcyon = reached(step, 'signal') && !reached(step, 'offer')
+  const showRisk = reached(step, 'usage') && !reached(step, 'progress')
+  const showExpansion = step === 'done' && !expansionSent
+  const needsCount = digest.length + (showHalcyon ? 1 : 0) + (showRisk ? 1 : 0) + (showExpansion ? 1 : 0)
 
   const runs = autonomyOn && reached(step, 'usage')
     ? [
@@ -116,8 +133,9 @@ export default function QueuePage() {
     : []
 
   const reviewed = [
+    ...(expansionSent ? [{ title: 'Expansion quote to Grace Liu at Quillstack', outcome: 'Approved', when: 'Today' }] : []),
     ...(expertRequested ? [{ title: 'Expert review: Quillstack renewal terms', outcome: 'Requested', when: 'Today' }] : []),
-    ...(checkinSent ? [{ title: 'Check-in to Ana Ruiz at Quillstack', outcome: 'Approved', when: step === 'done' ? '2 weeks ago' : 'Today' }] : []),
+    ...(checkinSent ? [{ title: 'Check-in to Ana Ruiz at Quillstack', outcome: 'Approved', when: step === 'done' ? '4 weeks ago' : 'Today' }] : []),
     ...(halcyonSent
       ? [{ title: 'First note to Maya Okafor at Halcyon Labs', outcome: `Approved with edits · opener ${openerWords} words`, when: reached(step, 'usage') ? '2 weeks ago' : 'Today' }]
       : []),
@@ -133,7 +151,7 @@ export default function QueuePage() {
     patch({ halcyonSent: true, openerWords: words })
     setSheet(null)
     next()
-    toast.success('Sent to Maya Okafor', { description: 'From priya@tracelane.dev · Pact will watch for the reply.' })
+    toast.success('Sent to Maya Okafor', { description: `From ${user.email} · Pact will watch for the reply.` })
     navigate('/home')
   }
 
@@ -141,6 +159,12 @@ export default function QueuePage() {
     patch({ checkinSent: true })
     setSheet(null)
     toast.success('Check-in sent to Ana Ruiz', { description: 'Pact will track alert setup against the promise.' })
+  }
+
+  const approveExpansion = () => {
+    patch({ expansionSent: true })
+    setSheet(null)
+    toast.success('Expansion quote sent to Grace Liu', { description: '14 seats, about $8K ARR · Pact will watch for the reply.' })
   }
 
   const requestExpert = (topic: string) => {
@@ -179,13 +203,13 @@ export default function QueuePage() {
                   icon={Mail}
                   type="Draft"
                   title="First note to Maya Okafor at Halcyon Labs"
-                  meta="Detected today · picks up your March 2025 thread · written the way your past notes read"
+                  meta={`Detected today · fit 94/100 · Maya championed ${user.company} at Brightline · picks up your March 2025 thread`}
                   actions={
                     <Button
                       size="sm"
-                      className={cn((step === 'queue' || step === 'decide') && 'demo-pulse')}
+                      className={cn((step === 'signal' || step === 'decide') && 'demo-pulse')}
                       onClick={() => {
-                        if (step === 'queue') next()
+                        if (step === 'signal') next()
                         setSheet('halcyon')
                       }}
                     >
@@ -193,9 +217,12 @@ export default function QueuePage() {
                     </Button>
                   }
                 >
-                  <Sources items={['Funding news', 'Job post: first SDR', 'Email · Mar 14, 2025', 'Your deal history']} />
+                  <Sources items={['Funding news', 'Job post: first SDR', 'Brightline account', 'Email · Mar 14, 2025', 'Your deal history']} />
                   <p>
                     <Inline text="**Why now:** Halcyon raised **$6M** yesterday and posted its first SDR job. In March, Maya said to revisit once they had raised." />
+                  </p>
+                  <p>
+                    <Inline text="**Returning champion:** Maya championed you at Brightline. Your deals with a returning champion closed in **26 days**, against **71** without one." />
                   </p>
                   <p>
                     <Inline text="**Looks like deals you won:** 3 past deals converted from pilot with the same shape: dev tools, 20 to 40 engineers, a first sales hire within 60 days of raising." />
@@ -211,7 +238,7 @@ export default function QueuePage() {
                   icon={TriangleAlert}
                   type="Risk"
                   title="Renewal risk: Quillstack pilot"
-                  meta="Pilot ends in 12 days · $36K ARR at stake · a promise from the kickoff call is behind"
+                  meta={pilot.riskMeta}
                   actions={
                     <>
                       {checkinSent ? (
@@ -219,7 +246,14 @@ export default function QueuePage() {
                           <Check /> Check-in sent
                         </Badge>
                       ) : (
-                        <Button size="sm" className="demo-pulse" onClick={() => setSheet('checkin')}>
+                        <Button
+                          size="sm"
+                          className="demo-pulse"
+                          onClick={() => {
+                            if (step === 'usage') next()
+                            setSheet('checkin')
+                          }}
+                        >
                           Open check-in
                         </Button>
                       )}
@@ -228,23 +262,60 @@ export default function QueuePage() {
                         variant="outline"
                         disabled={!checkinSent || expertRequested}
                         className={cn(checkinSent && !expertRequested && 'demo-pulse')}
-                        onClick={() => setExpertOpen(true)}
+                        onClick={() => requestExpert('Renewal terms and pricing')}
                       >
                         <UserRoundPlus /> Bring in an expert
                       </Button>
+                      {checkinSent && !expertRequested && (
+                        <Button size="sm" variant="ghost" onClick={() => setExpertOpen(true)}>
+                          Choose topic
+                        </Button>
+                      )}
                     </>
                   }
                 >
-                  <Sources items={['Kickoff call · 14:31', 'Product usage', 'Your deal history']} />
+                  <Sources items={pilot.sources} />
                   <blockquote className="border-l-2 pl-3 italic text-muted-foreground">
-                    Priya, at kickoff: "We'll have Slack alerts set up for all six teams in the first two weeks."
+                    {pilot.promise.who}: "{pilot.promise.quote}"
                   </blockquote>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Teams with Slack alerts on, against the promise (6)</p>
-                    <TargetBarChart data={quillstackAlerts(step)} target={6} height={150} format={(n) => String(n)} />
-                  </div>
+                  {pilot.evidence === 'usage' ? (
+                    <div>
+                      <p className="text-xs text-muted-foreground">Teams with Slack alerts on, against the promise (6)</p>
+                      <TargetBarChart data={quillstackAlerts(step)} target={6} height={150} format={(n) => String(n)} />
+                    </div>
+                  ) : (
+                    <>
+                      <p>
+                        <Inline text={pilot.evidenceLine.replace(/ \[\[.*\]\]$/, '')} />
+                      </p>
+                      <ConnectNudge id="product" />
+                    </>
+                  )}
+                  {pilot.cause && (
+                    <p>
+                      <Inline text={pilot.cause.replace(/ \[\[.*\]\]$/, '')} />
+                    </p>
+                  )}
                   <p>
                     <Inline text="**Why it matters:** fintech pilots that set up alerts in week 1 converted **3 of 3**; without them, **0 of 2**." />
+                  </p>
+                </QueueCard>
+              )}
+
+              {showExpansion && (
+                <QueueCard
+                  icon={Mail}
+                  type="Draft"
+                  title="Expansion quote to Grace Liu at Quillstack"
+                  meta={pilot.expansion.meta}
+                  actions={
+                    <Button size="sm" className="demo-pulse" onClick={() => setSheet('expansion')}>
+                      Open quote
+                    </Button>
+                  }
+                >
+                  <p>
+                    <Inline text={pilot.expansion.line.replace(/ \[\[.*\]\]$/, '')} />
                   </p>
                 </QueueCard>
               )}
@@ -340,6 +411,7 @@ export default function QueuePage() {
 
       <DraftSheet draft={halcyon} open={sheet === 'halcyon'} onOpenChange={(v) => setSheet(v ? 'halcyon' : null)} onApprove={approveHalcyon} />
       <DraftSheet draft={checkin} open={sheet === 'checkin'} onOpenChange={(v) => setSheet(v ? 'checkin' : null)} onApprove={approveCheckin} />
+      <DraftSheet draft={expansion} open={sheet === 'expansion'} onOpenChange={(v) => setSheet(v ? 'expansion' : null)} onApprove={approveExpansion} />
       <ExpertDialog open={expertOpen} onOpenChange={setExpertOpen} onConfirm={requestExpert} />
     </>
   )

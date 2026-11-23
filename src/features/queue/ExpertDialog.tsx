@@ -3,6 +3,8 @@ import { Check, UserRoundPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/input'
+import { pilotView } from '@/demo/sources'
+import { useDemo } from '@/store'
 import { cn } from '@/lib/utils'
 
 const TOPICS = [
@@ -13,10 +15,9 @@ const TOPICS = [
 
 /** "Human experts on call for big decisions": request a review from a person. Topic is required. */
 export function ExpertDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpenChange: (v: boolean) => void; onConfirm: (topic: string) => void }) {
+  const connected = useDemo((s) => s.connected)
   const [topic, setTopic] = useState<string | null>(null)
-  const [note, setNote] = useState(
-    'Quillstack pilot ends in 12 days. Slack alerts promised for 6 teams, on for 1. I sent a check-in today. Want a second pair of eyes before renewal.',
-  )
+  const [note, setNote] = useState(() => pilotView(connected).expertNote)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md p-5">

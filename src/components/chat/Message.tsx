@@ -163,7 +163,7 @@ export function AssistantMessage({
   onDone?: () => void
 }) {
   const blocks = message.blocks ?? []
-  const thinkMs = 900 + (message.context?.length ?? 0) * 250
+  const thinkMs = 450 + (message.context?.length ?? 0) * 120
   const [thinking, setThinking] = useState(animate)
   useEffect(() => {
     if (!animate) return
@@ -172,7 +172,7 @@ export function AssistantMessage({
   }, [animate, thinkMs])
 
   // Streaming starts after the "thinking" delay
-  const { visible, done } = useStreamedBlocks(blocks, animate, 55, thinkMs)
+  const { visible, done } = useStreamedBlocks(blocks, animate, 90, thinkMs)
   const shownBlocks = thinking ? [] : visible
 
   useEffect(() => {

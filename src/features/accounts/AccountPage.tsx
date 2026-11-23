@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronRight,
   FileText,
+  Hash,
   Mail,
   Radio,
   Sparkles,
@@ -25,12 +26,14 @@ import { Citation } from '@/components/chat/inline'
 import { TargetBarChart } from '@/components/charts/TargetBarChart'
 import { accountFor, quillstackAlerts, type Account, type TimelineKind } from '@/data/accounts'
 import { reached } from '@/demo/script'
+import { pilotView } from '@/demo/sources'
+import { ConnectNudge } from '@/demo/ConnectNudge'
 import { useDemo } from '@/store'
 import { cn } from '@/lib/utils'
 import { CallBrief } from './CallBrief'
 import { ROLE_TONE } from './roles'
 
-const KIND_ICON: Record<TimelineKind, LucideIcon> = { email: Mail, call: AudioLines, meeting: Video, signal: Radio, usage: Activity }
+const KIND_ICON: Record<TimelineKind, LucideIcon> = { email: Mail, call: AudioLines, meeting: Video, signal: Radio, usage: Activity, slack: Hash }
 
 /** A banner that moves the story on (same anatomy as the suggestions banner). */
 function NextBanner({ title, hint, onClick }: { title: string; hint: string; onClick: () => void }) {
@@ -130,6 +133,7 @@ function Timeline({ a }: { a: Account }) {
 
 function Promises({ a }: { a: Account }) {
   const step = useDemo((s) => s.step)
+  const product = useDemo((s) => s.connected.includes('product'))
   if (!a.promises) return <EmptyState icon={FileText} title="No promises yet" hint="Promises made on calls show up here once a pilot starts, tracked against product usage." />
   return (
     <div className="space-y-4">
@@ -145,7 +149,7 @@ function Promises({ a }: { a: Account }) {
           </thead>
           <tbody>
             {a.promises.map((p) => {
-              const pct = p.current / p.target
+              const pct = (p.current ?? 0) / p.target
               return (
                 <tr key={p.id} className="border-b align-top last:border-0">
                   <td className="px-3 py-3">
@@ -163,8 +167,8 @@ function Promises({ a }: { a: Account }) {
                           style={{ width: `${Math.min(100, pct * 100)}%` }}
                         />
                       </div>
-                      <span className="w-12 text-right text-xs tabular-nums">
-                        {p.current} / {p.target}
+                      <span className={cn('text-right text-xs tabular-nums', p.current === null ? 'w-20 text-muted-foreground' : 'w-12')}>
+                        {p.current === null ? 'Not measured' : `${p.current} / ${p.target}`}
                       </span>
                     </div>
                   </td>
@@ -177,9 +181,13 @@ function Promises({ a }: { a: Account }) {
           </tbody>
         </table>
       </div>
-      <SectionCard title="Slack alerts: teams with alerts on" icon={TrendingUp} actions={<span className="text-xs text-muted-foreground">Red line: promised (6 teams by week 2)</span>}>
-        <TargetBarChart data={quillstackAlerts(step)} target={6} height={200} format={(n) => String(n)} />
-      </SectionCard>
+      {product ? (
+        <SectionCard title="Slack alerts: teams with alerts on" icon={TrendingUp} actions={<span className="text-xs text-muted-foreground">Red line: promised (6 teams by week 2)</span>}>
+          <TargetBarChart data={quillstackAlerts(step)} target={6} height={200} format={(n) => String(n)} />
+        </SectionCard>
+      ) : (
+        <ConnectNudge id="product" />
+      )}
     </div>
   )
 }
@@ -190,7 +198,8 @@ export default function AccountPage() {
   const step = useDemo((s) => s.step)
   const next = useDemo((s) => s.next)
   const navigate = useNavigate()
-  const a = accountFor(step, id)
+  const connected = useDemo((s) => s.connected)
+  const a = accountFor(step, id, connected)
 
   if (!a) {
     return (
@@ -212,7 +221,7 @@ export default function AccountPage() {
 
   const base = `/accounts/${a.id}`
   const current = tab ?? 'overview'
-  const hasBrief = a.id === 'halcyon' && reached(step, 'brief')
+  const hasBrief = a.id === 'halcyon' && reached(step, 'offer')
 
   return (
     <>
@@ -234,23 +243,23 @@ export default function AccountPage() {
           </div>
 
           <div className="mt-5 space-y-4">
-            {a.id === 'halcyon' && step === 'account' && (
+            {a.id === 'halcyon' && (step === 'signal' || step === 'decide') && (
               <NextBanner
                 title="Pact drafted a first note to Maya, and it's waiting in your queue"
                 hint="Picks up your March thread · nothing sends without your yes"
                 onClick={() => {
-                  next()
-                  navigate('/queue')
+                  if (step === 'signal') next()
+                  navigate('/queue', { state: { open: 'halcyon' } })
                 }}
               />
             )}
-            {a.id === 'quillstack' && step === 'promises' && current === 'promises' && (
+            {a.id === 'quillstack' && (step === 'usage' || step === 'risk') && (
               <NextBanner
                 title="Pact flagged a renewal risk and drafted a check-in"
-                hint="The Slack alerts promise is behind with 12 days left · open it in your queue"
+                hint={pilotView(connected).bannerHint}
                 onClick={() => {
-                  next()
-                  navigate('/queue')
+                  if (step === 'usage') next()
+                  navigate('/queue', { state: { open: 'checkin' } })
                 }}
               />
             )}
@@ -262,6 +271,15 @@ export default function AccountPage() {
                       { label: 'Days left', value: a.pilot.daysLeft },
                       { label: 'Value', value: a.arr },
                       { label: 'Promises on track', value: `${a.promises?.filter((p) => p.health === 'Healthy').length ?? 0} of ${a.promises?.length ?? 0}` },
+                      ...(a.healthScore
+                        ? [
+                            {
+                              label: 'Health score',
+                              value: a.healthScore.was ? `${a.healthScore.was} → ${a.healthScore.now}` : a.healthScore.now,
+                              hint: 'From usage, replies and promises kept',
+                            },
+                          ]
+                        : []),
                     ]
                   : [
                       { label: 'Value', value: a.arr ?? '—' },

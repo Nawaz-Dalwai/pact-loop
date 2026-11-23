@@ -75,7 +75,7 @@ export function DraftSheet({
         window.clearInterval(timer.current)
         setFilling(false)
       }
-    }, 200)
+    }, 110)
   }, [draft.html])
 
   // "Type my edit": replace the opener with the founder's own, a few characters at a time

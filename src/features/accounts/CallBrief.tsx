@@ -1,11 +1,10 @@
-import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
-import { ArrowRight, Calendar, Copy } from 'lucide-react'
+import { Calendar, Copy, ShieldCheck } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Inline } from '@/components/chat/inline'
 import { accountFor } from '@/data/accounts'
-import { useDemo } from '@/store'
+import { useCurrentUser, useDemo } from '@/store'
 import { cn } from '@/lib/utils'
 import { ROLE_TONE } from './roles'
 
@@ -29,11 +28,11 @@ const QUESTIONS = [
 /** Call brief for the Halcyon intro call: a document with a sticky table of contents. */
 export function CallBrief() {
   const step = useDemo((s) => s.step)
-  const next = useDemo((s) => s.next)
   const skills = useDemo((s) => s.skills)
   const uploads = useDemo((s) => s.uploads)
-  const navigate = useNavigate()
-  const a = accountFor(step, 'halcyon')!
+  const connected = useDemo((s) => s.connected)
+  const user = useCurrentUser()
+  const a = accountFor(step, 'halcyon', connected)!
   const teach = skills['Discovery calls'] === 'help'
   const fromPlaybook = uploads.includes('playbook')
 
@@ -50,8 +49,8 @@ export function CallBrief() {
       <div className="flex items-center gap-3 rounded-lg border px-4 py-3">
         <Calendar className="size-4 text-muted-foreground" />
         <span className="flex-1">
-          <span className="block text-[13px] font-medium">Halcyon Labs × Tracelane · intro call</span>
-          <span className="block text-xs text-muted-foreground">Thursday, 2:00 – 2:30 PM · Maya Okafor, Daniel Reyes, Priya Raman</span>
+          <span className="block text-[13px] font-medium">Halcyon Labs × {user.company} · intro call</span>
+          <span className="block text-xs text-muted-foreground">Thursday, 2:00 – 2:30 PM · Maya Okafor, Daniel Reyes, {user.name}</span>
         </span>
         <Button
           variant="outline"
@@ -63,18 +62,13 @@ export function CallBrief() {
         >
           <Copy /> Copy brief
         </Button>
-        {step === 'brief' && (
-          <Button
-            size="sm"
-            className="demo-pulse"
-            onClick={() => {
-              next()
-              navigate('/home')
-            }}
-          >
-            Done reviewing <ArrowRight />
-          </Button>
-        )}
+      </div>
+
+      <div className="flex items-start gap-3 rounded-lg border border-violet-200 bg-violet-50/60 px-4 py-3">
+        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-violet-600" />
+        <p className="text-[13px] leading-relaxed">
+          <Inline text="**Sent ahead: the SOC 2 report.** Security review is where your deals stall: it added about 3 weeks to 5 of your last 9. Pact sent Daniel the report and the NDA with the invite, using the answer you pre-approved. [[Your deal history]]" />
+        </p>
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)_200px] gap-10">
@@ -139,7 +133,7 @@ export function CallBrief() {
               <li>Slack alerts for slow downstream calls, for every team on call</li>
               <li>Two teams sending traces in week 1</li>
             </ol>
-            <p className="mt-2 text-xs text-muted-foreground">Pact will track whatever you agree against product usage, all the way to renewal.</p>
+            <p className="mt-2 text-xs text-muted-foreground">Pact will track whatever you agree {connected.includes('product') ? 'against product usage' : connected.includes('calls') ? 'in email and calls' : 'in email'}, all the way to renewal.</p>
           </section>
 
           <section id="brief-questions" className="scroll-mt-4">
@@ -169,7 +163,7 @@ export function CallBrief() {
                 <Inline text="**Data residency:** US and EU regions; traces never leave the chosen region. [[Security FAQ]]" />
               </li>
               <li>
-                <Inline text="**Compliance:** SOC 2 Type II report available under NDA. [[Security FAQ]]" />
+                <Inline text="**Compliance:** SOC 2 Type II report available under NDA. Sent to Daniel with the invite. [[Security FAQ]]" />
               </li>
               <li>
                 <Inline text="**Pilot terms:** six weeks, free, success criteria agreed up front. [[Pilot plan template]]" />

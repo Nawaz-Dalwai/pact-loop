@@ -4,13 +4,15 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { KpiTiles } from '@/components/shared/record'
 import { HealthBadge, StatusBadge } from '@/components/shared/pills'
 import { accountsFor } from '@/data/accounts'
+import { sourcesPhrase } from '@/demo/sources'
 import { useDemo } from '@/store'
 
 /** /accounts — the live record: every account built from email, calls and product usage. */
 export default function AccountsPage() {
   const step = useDemo((s) => s.step)
   const navigate = useNavigate()
-  const accounts = accountsFor(step)
+  const connected = useDemo((s) => s.connected)
+  const accounts = accountsFor(step, connected)
   const count = (s: string) => accounts.filter((a) => a.status === s).length
 
   return (
@@ -21,7 +23,7 @@ export default function AccountsPage() {
           <div>
             <h1 className="text-2xl font-medium">Accounts</h1>
             <p className="mt-1 text-xs font-medium text-muted-foreground">
-              One live record per account, built from every email, call, meeting and product event. Showing {accounts.length} of 48.
+              One live record per account, built from every {sourcesPhrase(connected)}. Showing {accounts.length} of 48.
             </p>
           </div>
           <KpiTiles

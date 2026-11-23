@@ -10,6 +10,7 @@ import type { ChatMessage } from '@/components/chat/types'
 import { SAMPLE_DOCS, docById, type DocId, type DocKind } from '@/data/documents'
 import { useCurrentUser, useDemo } from '@/store'
 import { cn } from '@/lib/utils'
+import { useRevealScroll } from '@/lib/useRevealScroll'
 
 const KIND_TONE: Record<DocKind, string> = {
   pdf: 'text-red-600',
@@ -108,6 +109,7 @@ export function DocumentsSection() {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [progress, setProgress] = useState<Partial<Record<DocId, number>>>({})
+  const summaryRef = useRevealScroll(docsMode === 'upload' && uploadsDone && !docsRead)
 
   // Fake upload: each file fills its bar in turn, slightly staggered
   useEffect(() => {
@@ -137,7 +139,7 @@ export function DocumentsSection() {
         { type: 'ul', items: uploads.map((id) => docById(id).finding) },
         {
           type: 'p',
-          text: "I'll cite these in every draft and brief so you can check my work. Now a few quick confirmations instead of a questionnaire.",
+          text: "I'll cite these in every draft and brief so you can check my work. Here's the profile they point to.",
         },
       ],
     }),
@@ -227,7 +229,11 @@ export function DocumentsSection() {
               )
             })}
           </ul>
-          {uploadsDone && <AssistantMessage message={summary} animate={!docsRead} onDone={setDocsRead} />}
+          {uploadsDone && (
+            <div ref={summaryRef} className="scroll-mt-6">
+              <AssistantMessage message={summary} animate={!docsRead} onDone={setDocsRead} />
+            </div>
+          )}
         </div>
       )}
 

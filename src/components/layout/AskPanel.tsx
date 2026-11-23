@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { SquarePen, X } from 'lucide-react'
-import { useUi } from '@/store'
+import { useCurrentUser, useUi } from '@/store'
 import { AssistantMessage, UserBubble } from '@/components/chat/Message'
 import { Composer } from '@/components/chat/Composer'
 import type { ChatMessage } from '@/components/chat/types'
 
-const INTRO: ChatMessage = {
+const introFor = (first: string): ChatMessage => ({
   id: 'ask-intro',
   role: 'assistant',
   blocks: [
-    { type: 'p', text: "Hi Priya. In this demo I'm scripted to the loop you're walking through." },
+    { type: 'p', text: `Hi ${first}. In this demo I'm scripted to the loop you're walking through.` },
     { type: 'p', text: 'Follow the **guide strip** at the top. It shows where you are (Signal, Act, Surface, Decide, Learn) and the one thing to do next.' },
   ],
-}
+})
 
 const answer = (n: number): ChatMessage => ({
   id: `ask-${n}`,
@@ -30,6 +30,7 @@ export function AskPanel() {
   const open = useUi((s) => s.askOpen)
   const setOpen = useUi((s) => s.setAskOpen)
   const [asked, setAsked] = useState<string[]>([])
+  const user = useCurrentUser()
   if (!open) return null
 
   const iconBtn = 'rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -46,7 +47,7 @@ export function AskPanel() {
         </button>
       </div>
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-        <AssistantMessage message={INTRO} />
+        <AssistantMessage message={introFor(user.first)} />
         {asked.map((q, i) => (
           <div key={i} className="space-y-4">
             <UserBubble text={q} />

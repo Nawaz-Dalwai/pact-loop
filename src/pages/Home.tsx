@@ -1,20 +1,41 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { toast } from 'sonner'
-import { ArrowUp, BrainCircuit, ChevronRight, Mic, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, ArrowUp, ChevronRight, Mic, Radio, ShieldCheck, Sparkles, TriangleAlert, type LucideIcon } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
 import { AvatarStack } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { KpiTiles } from '@/components/shared/record'
 import { StatusBadge } from '@/components/shared/pills'
 import { OfferDialog } from '@/features/autonomy/OfferDialog'
-import { PLAN, progressFor } from '@/data/plan'
+import { PLAN, goalLabel, planFor, progressFor } from '@/data/plan'
 import { DIGEST } from '@/demo/useQueue'
 import { reached } from '@/demo/script'
-import { useCurrentUser, useDemo, useUi } from '@/store'
-import { cn } from '@/lib/utils'
+import { pilotView, sourcesPhrase } from '@/demo/sources'
+import { useCurrentUser, useDemo, useGoal, useUi } from '@/store'
 
-/** Home: greeting, Ask Pact, what needs the founder's call, today's calls, what Pact learned, progress. */
+/** A new signal: what Pact saw and what it prepared, one click from the decision. */
+function SignalCard({ icon: Icon, label, title, sub, cta, onOpen }: { icon: LucideIcon; label: string; title: string; sub: string; cta: string; onOpen: () => void }) {
+  return (
+    <button
+      onClick={onOpen}
+      className="demo-pulse mt-6 flex w-full items-center gap-3 rounded-xl border border-violet-200 bg-violet-50/50 p-4 text-left transition-colors hover:bg-violet-50"
+    >
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-background">
+        <Icon className="size-4 text-violet-600" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[11px] font-semibold uppercase tracking-wide text-violet-700">{label}</span>
+        <span className="mt-1 block text-[13px] font-medium leading-snug">{title}</span>
+        <span className="mt-1 block text-xs text-muted-foreground">{sub}</span>
+      </span>
+      <span className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground">
+        {cta} <ArrowRight className="size-3.5" />
+      </span>
+    </button>
+  )
+}
+
+/** Home: greeting, the new signal, Ask Pact, what needs the founder's call, today's calls, progress. */
 export default function Home() {
   const user = useCurrentUser()
   const setAskOpen = useUi((s) => s.setAskOpen)
@@ -22,23 +43,26 @@ export default function Home() {
   const next = useDemo((s) => s.next)
   const patch = useDemo((s) => s.patch)
   const dismissed = useDemo((s) => s.dismissed)
-  const openerWords = useDemo((s) => s.openerWords)
   const offerDeferred = useDemo((s) => s.offerDeferred)
   const autonomyOn = useDemo((s) => s.autonomyOn)
   const cap = useDemo((s) => s.autonomyCap)
+  const connected = useDemo((s) => s.connected)
   const navigate = useNavigate()
   const [prompt, setPrompt] = useState('')
   const firstName = user.name.split(' ')[0]
+  const goal = useGoal()
+  const plan = planFor(goal)
   const p = progressFor(step, reached(step, 'usage'))
-  const pct = Math.round((p.arr / PLAN.goal) * 100)
+  const pct = Math.round((p.arr / goal) * 100)
 
   const digestLeft = DIGEST.filter((d) => !dismissed[d.id]).length
   const waiting = [
-    ...(reached(step, 'account') && !reached(step, 'reply') ? [{ type: 'Draft', title: 'First note to Maya Okafor at Halcyon Labs' }] : []),
-    ...(reached(step, 'promises') && !reached(step, 'progress') ? [{ type: 'Risk', title: 'Renewal risk: Quillstack pilot' }] : []),
+    ...(reached(step, 'signal') && !reached(step, 'offer') ? [{ type: 'Draft', title: 'First note to Maya Okafor at Halcyon Labs' }] : []),
+    ...(reached(step, 'usage') && !reached(step, 'progress') ? [{ type: 'Risk', title: 'Renewal risk: Quillstack pilot' }] : []),
     ...(digestLeft ? [{ type: 'Digest', title: `${digestLeft} from yesterday's digest` }] : []),
   ]
-  const callToday = reached(step, 'brief') && !reached(step, 'usage')
+  const callToday = reached(step, 'offer') && !reached(step, 'usage')
+  const pilot = pilotView(connected)
 
   const submit = () => {
     if (!prompt.trim()) return
@@ -52,6 +76,33 @@ export default function Home() {
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[760px] px-6 pb-16 pt-16">
           <h1 className="bg-linear-to-bl from-violet-500 to-blue-500 bg-clip-text text-4xl font-medium text-transparent">Hi {firstName}</h1>
+
+          {step === 'signal' && (
+            <SignalCard
+              icon={Radio}
+              label="New signal · Halcyon Labs · fit 94/100"
+              title="Halcyon raised a $6M seed. Maya Okafor, your champion at Brightline, now runs platform there."
+              sub="Pact researched the account and drafted a first note to Maya. Nothing sends without your yes."
+              cta="Open what Pact prepared"
+              onOpen={() => {
+                next()
+                navigate('/queue', { state: { open: 'halcyon' } })
+              }}
+            />
+          )}
+          {step === 'usage' && (
+            <SignalCard
+              icon={TriangleAlert}
+              label="Renewal risk · Quillstack pilot · health 78 → 41"
+              title={pilot.notification}
+              sub={pilot.known ? 'Pact found the cause and drafted a check-in that owns the miss.' : "Pact drafted a check-in that asks how it's going."}
+              cta="Open what Pact found"
+              onOpen={() => {
+                next()
+                navigate('/queue', { state: { open: 'checkin' } })
+              }}
+            />
+          )}
 
           <div className="mt-6 rounded-xl border bg-background p-3 shadow-xs focus-within:ring-2 focus-within:ring-ring/30">
             <textarea
@@ -82,39 +133,6 @@ export default function Home() {
             </div>
           </div>
 
-          {step === 'learned' && (
-            <section className="mt-8 rounded-lg border p-4 shadow-xs">
-              <div className="flex items-start gap-3">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-violet-50">
-                  <BrainCircuit className="size-4 text-violet-600" />
-                </span>
-                <div className="flex-1">
-                  <p className="text-[13px] font-medium">Pact learned: you prefer short openers</p>
-                  <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
-                    You cut Pact's opener to Maya from 43 words to {openerWords} before sending, and she replied within a day. Your
-                    last 20 sent notes open in 9 to 14 words, so first notes will now open in under 15.
-                  </p>
-                  <div className="mt-3 flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        patch({ learnedUndone: true })
-                        next()
-                        toast('Undone', { description: 'Pact keeps its own openers. Your edits will still teach it.' })
-                      }}
-                    >
-                      Undo
-                    </Button>
-                    <Button size="sm" className="demo-pulse" onClick={next}>
-                      Got it
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
           {step === 'offer' && offerDeferred && (
             <button
               onClick={() => patch({ offerDeferred: false })}
@@ -138,7 +156,7 @@ export default function Home() {
             </p>
             {waiting.length === 0 ? (
               <div className="mt-4 rounded-lg border bg-background px-4 py-6 text-center text-[13px] text-muted-foreground">
-                Nothing waiting. Pact is watching every email, call, meeting and outside signal.
+                Nothing waiting. Pact is watching every {sourcesPhrase(connected)}, and outside signals.
               </div>
             ) : (
               <ul className="mt-4 divide-y rounded-lg border bg-background">
@@ -158,19 +176,21 @@ export default function Home() {
           {callToday && (
             <section className="mt-12">
               <h2 className="text-2xl font-medium">On deck</h2>
-              <p className="mt-1 text-xs font-medium text-muted-foreground">Your next call · brief prepared by Pact</p>
+              <p className="mt-1 text-xs font-medium text-muted-foreground">
+                {connected.includes('calendar') ? 'Your next call' : 'Agreed by email · invite sent from your Gmail'} · brief prepared by Pact
+              </p>
               <div className="mt-4 flex items-center gap-3 rounded-lg border bg-background p-4 shadow-xs">
                 <div className="h-12 w-0.5 rounded-full bg-neutral-400" />
                 <div className="min-w-0 flex-1">
                   <Link to="/accounts/halcyon/brief" className="text-sm font-medium hover:underline">
-                    Halcyon Labs × Tracelane · intro call
+                    Halcyon Labs × {user.company} · intro call
                   </Link>
                   <p className="text-xs text-muted-foreground">Thursday, 2:00 PM - 2:30 PM</p>
                   <div className="mt-1.5">
-                    <AvatarStack names={['Maya Okafor', 'Daniel Reyes', 'Priya Raman']} />
+                    <AvatarStack names={['Maya Okafor', 'Daniel Reyes', user.name]} />
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className={cn(step === 'brief' && 'demo-pulse')} onClick={() => navigate('/accounts/halcyon/brief')}>
+                <Button variant="outline" size="sm" onClick={() => navigate('/accounts/halcyon/brief')}>
                   <Sparkles /> View call brief
                 </Button>
               </div>
@@ -191,12 +211,12 @@ export default function Home() {
           )}
 
           <section className="mt-12">
-            <h2 className="text-2xl font-medium">Progress to $1M ARR</h2>
+            <h2 className="text-2xl font-medium">Progress to {goalLabel(goal)} new ARR</h2>
             <p className="mt-1 text-xs font-medium text-muted-foreground">Plan agreed · Pact reports progress every turn</p>
             <Link to="/plan" className="mt-4 block rounded-lg border bg-background p-4 shadow-xs hover:bg-table-background-hover">
               <div className="flex items-baseline justify-between">
                 <p className="text-lg font-medium tabular-nums">
-                  ${p.arr}K <span className="text-[13px] font-normal text-muted-foreground">of $1M by {PLAN.deadline}</span>
+                  ${p.arr}K <span className="text-[13px] font-normal text-muted-foreground">of {goalLabel(goal)} new ARR by {PLAN.deadline}</span>
                 </p>
                 <span className="text-xs tabular-nums text-muted-foreground">{pct}%</span>
               </div>
@@ -207,9 +227,9 @@ export default function Home() {
             <div className="mt-3">
               <KpiTiles
                 items={[
-                  { label: 'Leads this month', value: `${p.leads} of 32` },
-                  { label: 'Pilots this month', value: `${p.pilots} of 7` },
-                  { label: 'Conversions this month', value: `${p.conversions} of 3` },
+                  { label: 'Leads this month', value: `${p.leads} of ${plan.perMonth.leads}` },
+                  { label: 'Pilots this month', value: `${p.pilots} of ${plan.perMonth.pilots}` },
+                  { label: 'Conversions this month', value: `${p.conversions} of ${plan.perMonth.deals}` },
                 ]}
               />
             </div>

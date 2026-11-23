@@ -21,12 +21,12 @@ export interface SampleDoc {
 export const SAMPLE_DOCS: SampleDoc[] = [
   {
     id: 'deck',
-    name: 'Tracelane seed pitch deck.pdf',
+    name: 'Seed pitch deck.pdf',
     kind: 'pdf',
     size: '4.2 MB',
     meta: '18 slides',
     learns: 'Product, market, traction',
-    finding: '**Product and traction:** distributed tracing for backend teams, priced per seat with a usage tier; $310K ARR from 7 paid customers [[Seed deck · slides 6, 9]]',
+    finding: '**Product and traction:** on-call alerting for backend teams, built on tracing, priced per seat with a usage tier; $310K ARR from 7 paid customers [[Seed deck · slides 6, 9]]',
   },
   {
     id: 'icp',
@@ -35,7 +35,7 @@ export const SAMPLE_DOCS: SampleDoc[] = [
     size: '184 KB',
     meta: '2 pages',
     learns: 'Who you sell to, and who buys',
-    finding: '**Who you sell to:** Series A dev-tools and fintech teams of 20 to 80 engineers; the buyer is the head of platform [[ICP one-pager · p.1]]',
+    finding: '**Who you sell to:** Series A fintech and dev-tools teams of 20 to 80 engineers; the buyer is the head of platform [[ICP one-pager · p.1]]',
   },
   {
     id: 'playbook',
