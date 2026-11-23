@@ -10,7 +10,7 @@ decision, until a task has earned enough trust to run on its own.
 
 This prototype lets anyone walk that loop twice, end to end, with no one there to explain it.
 
-![The queue: every suggestion arrives with its evidence and the next move](docs/screenshots/2-surface-queue.png)
+![Decide: Pact's draft, with its research and evidence beside it](docs/screenshots/4-decide-draft.png)
 
 ---
 
@@ -46,11 +46,10 @@ approve the **expansion quote** Pact drafted from seat usage.
 
 | | |
 |---|---|
-| ![Setup: upload documents instead of typing](docs/screenshots/1-setup-documents.png) **Setup:** documents in, cited findings out | ![Decide: a draft you must edit before approving](docs/screenshots/3-decide-draft.png) **Decide:** the draft, with Pact's reasoning beside it |
-| ![Act: call brief](docs/screenshots/4-act-call-brief.png) **Act:** a call brief, every line cited | ![Learn: autonomy offer with a required cap](docs/screenshots/5-learn-autonomy-offer.png) **Learn:** autonomy is offered, never assumed |
-| ![Deliver: promises against usage](docs/screenshots/6-deliver-promises.png) **Deliver:** promises from the call, tracked against usage | ![Autonomy controls](docs/screenshots/8-autonomy-controls.png) **Control:** guardrails, run log, take it back |
-
-![Finish: progress against the plan, and a recap of the loop](docs/screenshots/7-learn-plan-finish.png)
+| ![Start: play the founder, under your own name](docs/screenshots/0-landing.png) **Start:** play the founder, under your own name | ![Setup: Pact contradicts the ICP with your own deals](docs/screenshots/1-setup-profile.png) **Setup:** Pact contradicts the ICP with your deals; you add what it can't see |
+| ![Plan: worked back from the goal you pick](docs/screenshots/2-setup-plan.png) **Plan:** worked back from the goal you pick | ![Signal: a past champion's company just raised](docs/screenshots/3-signal.png) **Signal:** one card, one click to what Pact prepared |
+| ![Learn: a day later, and autonomy offered](docs/screenshots/5-learn-a-day-later.png) **Learn:** what Pact learned, and autonomy offered within a cap | ![Deliver: a check-in that owns the miss](docs/screenshots/6-deliver-checkin.png) **Deliver:** the promise, the usage and the cause, then a check-in |
+| ![Grow: the expansion quote and the finish](docs/screenshots/7-finish.png) **Grow:** an expansion quote, then a recap of the loop | ![Control: guardrails, run log, take it back](docs/screenshots/8-autonomy-controls.png) **Control:** guardrails, run log, take it back |
 
 ## Design decisions
 
