@@ -1,8 +1,6 @@
 # Pact: the revenue loop, as an interactive prototype
 
-**[▶ Try the live demo](https://pact-loop.vercel.app/)** · desktop, about 5 minutes, no sign-up
-
-**Background:** [Pitch deck (PDF)](docs/Pact-Pitch-Deck.pdf): the problem, who it's for, the product, differentiation and business model · [Engineering approach (PDF)](docs/Pact-Engineering-Approach.pdf): MVP scope, architecture, AI quality, cost, trust and safety, team and rollout plan.
+**[▶ Try the live demo](https://pact-loop.vercel.app/)** · desktop, about 3 minutes, no sign-up
 
 Pact is a concept for a self-improving revenue system for early-stage B2B founders. It replaces the CRM with one loop
 that runs revenue end to end: it **suggests** the next move, **waits for the founder's yes**, and **learns** from every
@@ -79,45 +77,6 @@ The product brief left these open, so the prototype commits to one answer each:
 | Buyers' AI agents want answers instantly. Approval or not? | Pre-approved answers only, each approved once (marked **Next**) |
 | When does autonomy stop? | It pauses itself after 2 edits in a row (on by default), and stops at the monthly cap |
 | How does Pact learn with little deal history? | A day-one import from past email, plus the founder's own documents |
-
-## How it's built
-
-React 19 · TypeScript · Vite · Tailwind CSS v4 · Radix UI primitives (shadcn-style components) · Zustand · React Router ·
-Tiptap (email editor) · Recharts · Sonner · Puppeteer (end-to-end walkthrough)
-
-- **The demo is a state machine.** [`src/demo/script.ts`](src/demo/script.ts) lists all 16 steps in order, each with
-  its loop stage, route and hint. The guide strip, route guards, pulses and "Skip time" all read from it, so the story
-  can't be broken by clicking around.
-- **The store is the fake backend.** [`src/store`](src/store/index.ts) keeps the demo's state in `localStorage`, so a
-  reload resumes where you left off. Restart from ↺ in the guide strip.
-- **Scripted, not generated.** Pact's replies are fixed content that streams in word by word, with "Gathering
-  context…" steps and citations. Some of it adapts to what you chose in setup (segments, skills, uploaded documents).
-- **Static hosting.** Hash routes and relative asset paths mean `dist/` runs on any static host. Vercel deploys `main`
-  (with previews for pull requests); GitHub Actions lints and builds every push.
-
-```
-src/
-  demo/        script (the state machine), guide strip, notifications, queue counts
-  data/        fictional accounts, sample documents, plan numbers
-  features/
-    onboarding/  connect · learn the business (upload or answer) · plan
-    queue/       queue, draft review, expert request
-    accounts/    accounts, account record (overview, timeline, promises), call brief
-    autonomy/    autonomy offer and controls
-    plan/        progress against the plan, what Pact learned, finish
-  components/  design system: ui primitives, layout shell, chat, editor, charts
-e2e/           headless-Chrome walkthrough of the whole demo
-```
-
-## Run it locally
-
-```bash
-npm install
-npm run dev          # http://localhost:5173 (desktop, at least 1280 px wide)
-npm run lint         # zero warnings
-npm run build        # static site in dist/
-npm run e2e          # with the dev server running; SKIP_DOCS=1 for the no-upload path
-```
 
 ## Scope
 
